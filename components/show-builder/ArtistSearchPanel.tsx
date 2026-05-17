@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, MapPin, Users, TrendingUp, Plus, Check, Zap, X } from 'lucide-react';
+import { Search, SlidersHorizontal, MapPin, TrendingUp, Plus, Check, Zap, X, ChevronDown } from 'lucide-react';
 import type { Artist, LineupSlot } from './showData';
 import { ARTIST_POOL, getCompatibility } from './showData';
 
@@ -14,14 +14,29 @@ interface Props {
 const ALL_GENRES = ['All Genres', 'Techno', 'Industrial', 'House', 'Ambient', 'Noise', 'EBM', 'Experimental', 'Minimal'];
 const ALL_CITIES = ['All Cities', 'Chicago', 'Detroit', 'Berlin', 'London', 'Amsterdam', 'New York', 'Milwaukee'];
 
+type FeeFilter = 'all' | 'budget' | 'mid' | 'premium';
+type SortBy = 'compat' | 'draw' | 'fee-low' | 'fee-high';
+
 export default function ArtistSearchPanel({ lineup, onAddArtist, onDragStart }: Props) {
   const [query, setQuery] = useState('');
   const [genreFilter, setGenreFilter] = useState('All Genres');
   const [cityFilter, setCityFilter] = useState('All Cities');
   const [showFilters, setShowFilters] = useState(false);
   const [drawFilter, setDrawFilter] = useState<'all' | 'local' | 'touring' | 'international'>('all');
+  const [feeFilter, setFeeFilter] = useState<FeeFilter>('all');
+  const [sortBy, setSortBy] = useState<SortBy>('compat');
 
   const lineupIds = new Set(lineup.map((s) => s.artist.id));
+
+  const bestPicks = useMemo(() => {
+    if (lineup.length === 0) return [];
+    return ARTIST_POOL
+      .filter((a) => !lineupIds.has(a.id))
+      .map((a) => ({ ...a, compat: getCompatibility(a, lineup) }))
+      .sort((a, b) => b.compat - a.compat)
+      .slice(0, 3);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lineup]);
 
   const filtered = useMemo(() => {
     return ARTIST_POOL
@@ -33,11 +48,20 @@ export default function ArtistSearchPanel({ lineup, onAddArtist, onDragStart }: 
         if (drawFilter === 'local' && a.draw > 180) return false;
         if (drawFilter === 'touring' && (a.draw < 180 || a.draw > 280)) return false;
         if (drawFilter === 'international' && a.draw < 280) return false;
+        if (feeFilter === 'budget' && a.feeMax >= 500) return false;
+        if (feeFilter === 'mid' && (a.feeMin >= 1200 || a.feeMax < 500)) return false;
+        if (feeFilter === 'premium' && a.feeMin <= 1200) return false;
         return true;
       })
       .map((a) => ({ ...a, compat: getCompatibility(a, lineup) }))
-      .sort((a, b) => (lineup.length > 0 ? b.compat - a.compat : b.draw - a.draw));
-  }, [query, genreFilter, cityFilter, drawFilter, lineup]);
+      .sort((a, b) => {
+        if (sortBy === 'compat') return lineup.length > 0 ? b.compat - a.compat : b.draw - a.draw;
+        if (sortBy === 'draw') return b.draw - a.draw;
+        if (sortBy === 'fee-low') return a.feeMin - b.feeMin;
+        if (sortBy === 'fee-high') return b.feeMax - a.feeMax;
+        return 0;
+      });
+  }, [query, genreFilter, cityFilter, drawFilter, feeFilter, sortBy, lineup]);
 
   return (
     <div className="flex flex-col h-full">
@@ -71,6 +95,36 @@ export default function ArtistSearchPanel({ lineup, onAddArtist, onDragStart }: 
               <X className="w-3 h-3" />
             </button>
           )}
+        </div>
+
+        {/* Sort + fee row */}
+        <div className="flex items-center gap-2 mt-2">
+          <div className="relative flex-1">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortBy)}
+              className="w-full appearance-none glass rounded-lg px-2.5 py-1.5 text-slate-400 text-[10px] outline-none bg-white/[0.03] border border-white/[0.06] pr-6"
+            >
+              <option value="compat" className="bg-[#0c0c14]">Sort: Compat</option>
+              <option value="draw" className="bg-[#0c0c14]">Sort: Draw</option>
+              <option value="fee-low" className="bg-[#0c0c14]">Sort: Fee ↑</option>
+              <option value="fee-high" className="bg-[#0c0c14]">Sort: Fee ↓</option>
+            </select>
+            <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-600 pointer-events-none" />
+          </div>
+          <div className="relative flex-1">
+            <select
+              value={feeFilter}
+              onChange={(e) => setFeeFilter(e.target.value as FeeFilter)}
+              className="w-full appearance-none glass rounded-lg px-2.5 py-1.5 text-slate-400 text-[10px] outline-none bg-white/[0.03] border border-white/[0.06] pr-6"
+            >
+              <option value="all" className="bg-[#0c0c14]">All Budgets</option>
+              <option value="budget" className="bg-[#0c0c14]">Budget &lt;$500</option>
+              <option value="mid" className="bg-[#0c0c14]">Mid $500–$1.2k</option>
+              <option value="premium" className="bg-[#0c0c14]">Premium $1.2k+</option>
+            </select>
+            <ChevronDown className="absolute right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-600 pointer-events-none" />
+          </div>
         </div>
 
         {showFilters && (
@@ -127,6 +181,57 @@ export default function ArtistSearchPanel({ lineup, onAddArtist, onDragStart }: 
 
       {/* Artist list */}
       <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+
+        {/* Best Picks section */}
+        {lineup.length > 0 && bestPicks.length > 0 && (
+          <div className="mb-3">
+            <div className="flex items-center gap-1.5 px-1 mb-2">
+              <span className="text-[10px] font-bold tracking-wider" style={{ color: '#a855f7' }}>✦ Best for your lineup</span>
+            </div>
+            <div className="space-y-1">
+              {bestPicks.map((artist) => {
+                const inLineup = lineupIds.has(artist.id);
+                const compatColor = artist.compat >= 70 ? '#10b981' : artist.compat >= 45 ? '#f59e0b' : '#64748b';
+                return (
+                  <div
+                    key={`best-${artist.id}`}
+                    className="flex items-center gap-2 p-2 rounded-xl border transition-all"
+                    style={{ backgroundColor: '#a855f708', borderColor: '#a855f720' }}
+                  >
+                    <div className="relative flex-shrink-0">
+                      <img src={artist.image} alt={artist.name} className="w-8 h-8 rounded-lg object-cover" />
+                      {artist.verified && (
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full flex items-center justify-center"
+                          style={{ backgroundColor: artist.accentColor }}>
+                          <Check className="w-1.5 h-1.5 text-white" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-white font-semibold text-[11px] truncate">{artist.name}</div>
+                      <div className="text-slate-500 text-[10px] truncate">{artist.city} · {artist.genres[0]}</div>
+                    </div>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                        style={{ backgroundColor: `${compatColor}18`, color: compatColor, border: `1px solid ${compatColor}30` }}>
+                        {artist.compat}%
+                      </span>
+                      <button
+                        onClick={() => !inLineup && onAddArtist(artist)}
+                        className="w-5 h-5 rounded-lg flex items-center justify-center border border-white/[0.12] hover:border-white/30 transition-opacity"
+                        style={{ opacity: inLineup ? 0.3 : 1 }}
+                      >
+                        {inLineup ? <Check className="w-2.5 h-2.5 text-slate-400" /> : <Plus className="w-2.5 h-2.5 text-white" />}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="h-px bg-white/[0.05] mx-1 mt-3 mb-1" />
+          </div>
+        )}
+
         {filtered.length === 0 && (
           <div className="text-center py-10 text-slate-600 text-xs">No artists match your filters</div>
         )}
@@ -151,6 +256,21 @@ export default function ArtistSearchPanel({ lineup, onAddArtist, onDragStart }: 
           {filtered.length} artists · Drag to lineup or click +
         </p>
       </div>
+    </div>
+  );
+}
+
+function SocialDots({ score }: { score: number }) {
+  const filled = Math.round((score / 100) * 5);
+  return (
+    <div className="flex items-center gap-0.5">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <div
+          key={i}
+          className="w-1 h-1 rounded-full"
+          style={{ backgroundColor: i < filled ? '#a855f7' : 'rgba(255,255,255,0.1)' }}
+        />
+      ))}
     </div>
   );
 }
@@ -203,7 +323,9 @@ function ArtistCard({ artist, compat, inLineup, showCompat, onAdd, onDragStart }
           <span className="flex items-center gap-0.5 text-[10px] text-slate-600">
             <TrendingUp className="w-2.5 h-2.5" />{artist.draw}
           </span>
+          <SocialDots score={artist.socialScore} />
         </div>
+        <div className="text-[10px] text-slate-600 mt-0.5">{artist.fee}</div>
       </div>
 
       <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
@@ -220,7 +342,7 @@ function ArtistCard({ artist, compat, inLineup, showCompat, onAdd, onDragStart }
         ) : (
           <button
             onClick={onAdd}
-            className="w-6 h-6 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-white/[0.1] hover:border-white/30"
+            className="w-6 h-6 rounded-lg flex items-center justify-center transition-opacity border border-white/[0.1] hover:border-white/30 opacity-40 group-hover:opacity-100"
           >
             <Plus className="w-3 h-3 text-white" />
           </button>

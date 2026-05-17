@@ -84,6 +84,187 @@ export function estimateTurnout(
   };
 }
 
+// ─── Advanced Scoring Functions ───────────────────────────────────────────────
+
+/**
+ * Genre coherence: how well all genres in the lineup cohere (0–100).
+ * Score high when 2–4 cohesive genres. Penalize too many (>5) or single genre.
+ */
+export function getGenreFit(lineup: LineupSlot[]): number {
+  if (lineup.length === 0) return 0;
+  const allGenres = lineup.flatMap((s) => s.artist.genres);
+  const uniqueGenres = new Set(allGenres);
+  const count = uniqueGenres.size;
+
+  if (count <= 1) return 50; // single genre — coherent but boring
+  if (count === 2) return 90;
+  if (count === 3) return 95;
+  if (count === 4) return 85;
+  if (count === 5) return 70;
+  // >5 unique genres — too scattered
+  return Math.max(20, 70 - (count - 5) * 10);
+}
+
+/**
+ * Venue fit: how well total draw fits the venue capacity (0–100).
+ * Uses estimateTurnout to get fill percentage.
+ */
+export function getVenueFit(lineup: LineupSlot[], capacity: number): number {
+  if (lineup.length === 0 || capacity === 0) return 0;
+  const { pct } = estimateTurnout(lineup, capacity);
+  if (pct >= 80 && pct <= 100) return 95;
+  if (pct >= 60) return 80;
+  if (pct >= 40) return 65;
+  if (pct > 100) return 70; // over capacity — too big or oversold
+  return 40; // under 40%
+}
+
+/**
+ * Promo strength: based on socialScore and verified status (0–100).
+ * Average socialScore of all artists, bonus for verified (+5 each, max +20).
+ */
+export function getPromoStrength(lineup: LineupSlot[]): number {
+  if (lineup.length === 0) return 0;
+  const avgSocial = lineup.reduce((sum, s) => sum + s.artist.socialScore, 0) / lineup.length;
+  const verifiedCount = lineup.filter((s) => s.artist.verified).length;
+  const verifiedBonus = Math.min(20, verifiedCount * 5);
+  return Math.min(100, Math.max(20, Math.round(avgSocial + verifiedBonus)));
+}
+
+/**
+ * Overall show score: weighted average of all factors (0–100).
+ * Weights: genreFit*0.25 + venueFit*0.25 + promoStrength*0.2 + avgCompat*0.3
+ */
+export function getOverallScore(lineup: LineupSlot[], capacity: number): number {
+  if (lineup.length === 0) return 0;
+
+  const genreFit = getGenreFit(lineup);
+  const venueFit = getVenueFit(lineup, capacity);
+  const promoStrength = getPromoStrength(lineup);
+
+  // Compute average pairwise compatibility
+  let compatSum = 0;
+  let compatCount = 0;
+  for (let i = 0; i < lineup.length; i++) {
+    for (let j = 0; j < lineup.length; j++) {
+      if (i !== j) {
+        compatSum += getCompatibility(lineup[i].artist, [lineup[j]]);
+        compatCount++;
+      }
+    }
+  }
+  const avgCompat = compatCount > 0 ? compatSum / compatCount : 50;
+
+  return Math.round(
+    genreFit * 0.25 + venueFit * 0.25 + promoStrength * 0.2 + avgCompat * 0.3
+  );
+}
+
+/**
+ * Risk warnings: array of warning strings based on lineup state.
+ */
+export function getRiskWarnings(
+  lineup: LineupSlot[],
+  capacity: number
+): Array<{ level: 'critical' | 'warning'; text: string }> {
+  const warnings: Array<{ level: 'critical' | 'warning'; text: string }> = [];
+
+  if (lineup.length === 0) return warnings;
+
+  // No headliner
+  const hasHeadliner = lineup.some((s) => s.role === 'headliner');
+  if (!hasHeadliner) {
+    warnings.push({ level: 'critical', text: 'No headliner — lineup lacks a top-billed act' });
+  }
+
+  // Only 1 artist
+  if (lineup.length === 1) {
+    warnings.push({ level: 'warning', text: 'Only one artist in lineup — add more for a full show' });
+  }
+
+  // Very low venue fill
+  const { pct } = estimateTurnout(lineup, capacity);
+  if (pct < 40) {
+    warnings.push({ level: 'warning', text: `Low projected fill (${pct}%) — consider a smaller venue or more draw` });
+  }
+
+  // No confirmed artists
+  const confirmedCount = lineup.filter((s) => s.status === 'confirmed').length;
+  if (confirmedCount === 0) {
+    warnings.push({ level: 'critical', text: 'No artists confirmed — lineup is all pending or unconfirmed' });
+  }
+
+  // Overlapping set times
+  const sortedByTime = [...lineup].sort((a, b) => {
+    const toMins = (t: string) => {
+      const [h, m] = t.split(':').map(Number);
+      return (h < 6 ? h + 24 : h) * 60 + m;
+    };
+    return toMins(a.startTime) - toMins(b.startTime);
+  });
+  for (let i = 0; i < sortedByTime.length - 1; i++) {
+    const curr = sortedByTime[i];
+    const next = sortedByTime[i + 1];
+    const toMins = (t: string) => {
+      const [h, m] = t.split(':').map(Number);
+      return (h < 6 ? h + 24 : h) * 60 + m;
+    };
+    const currEnd = toMins(curr.startTime) + curr.duration;
+    const nextStart = toMins(next.startTime);
+    if (currEnd > nextStart && curr.role !== 'b2b' && next.role !== 'b2b') {
+      warnings.push({ level: 'warning', text: `Set time overlap: ${curr.artist.name} and ${next.artist.name}` });
+    }
+  }
+
+  return warnings;
+}
+
+/**
+ * Missing pieces: suggested additions based on lineup state.
+ */
+export function getMissingPieces(lineup: LineupSlot[]): string[] {
+  const suggestions: string[] = [];
+
+  if (lineup.length === 0) return suggestions;
+
+  // No headliner
+  const hasHeadliner = lineup.some((s) => s.role === 'headliner');
+  if (!hasHeadliner) {
+    suggestions.push('Add a headliner to anchor your lineup');
+  }
+
+  // No opener when 2+ artists
+  if (lineup.length >= 2) {
+    const hasOpener = lineup.some((s) => s.role === 'opener');
+    if (!hasOpener) {
+      suggestions.push('Add an opener to warm up the crowd');
+    }
+  }
+
+  // All same genre — suggest variety
+  const allGenres = lineup.flatMap((s) => s.artist.genres);
+  const uniqueGenres = new Set(allGenres);
+  if (uniqueGenres.size === 1 && lineup.length >= 2) {
+    suggestions.push('All artists share the same genre — consider adding variety');
+  }
+
+  // Low promo strength
+  const promoStrength = getPromoStrength(lineup);
+  if (promoStrength < 50) {
+    suggestions.push('Low promo reach — add a verified artist to boost promotion');
+  }
+
+  // No support act when 3+ artists
+  if (lineup.length >= 3) {
+    const hasSupport = lineup.some((s) => s.role === 'support');
+    if (!hasSupport) {
+      suggestions.push('Consider adding a support act to fill the mid-lineup slot');
+    }
+  }
+
+  return suggestions;
+}
+
 // ─── Color Utilities ──────────────────────────────────────────────────────────
 
 /** Append hex alpha to a color: ('#a855f7', 20) → '#a855f720' */
