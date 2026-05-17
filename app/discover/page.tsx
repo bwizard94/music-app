@@ -1,6 +1,8 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useState, useMemo, useRef, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Search, LayoutGrid, List, SlidersHorizontal, X, Star,
@@ -771,7 +773,8 @@ function SavedSearchPill({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function DiscoverPage() {
+function DiscoverPageInner() {
+  const searchParams = useSearchParams();
   const [view, setView]               = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters]  = useState(true);
   const [sort, setSort]               = useState('relevance');
@@ -796,6 +799,13 @@ export default function DiscoverPage() {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
+
+  useEffect(() => {
+    const genre = searchParams.get('genre');
+    if (genre) {
+      setFilters(prev => ({ ...prev, genres: [genre] }));
+    }
+  }, [searchParams]);
 
   function patchFilter(patch: Partial<FilterState>) {
     setFilters((prev) => ({ ...prev, ...patch }));
@@ -1198,5 +1208,13 @@ export default function DiscoverPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DiscoverPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#060608]" />}>
+      <DiscoverPageInner />
+    </Suspense>
   );
 }

@@ -237,7 +237,7 @@ export default function NewProposalPage() {
         proposed_date: draft.proposedDate,
         doors_time: draft.doorsTime || null,
         end_time: draft.endTime || null,
-        status: 'pending',
+        status: 'submitted',
         estimated_draw: draft.estimatedDraw,
         total_artist_fees: totalArtistFees,
         production_budget: draft.productionBudget,

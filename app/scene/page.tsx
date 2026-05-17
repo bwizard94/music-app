@@ -136,8 +136,9 @@ export default function SceneIndexPage() {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {GENRE_HUBS.map((genre) => (
-                <button
+                <Link
                   key={genre.name}
+                  href={`/discover?genre=${encodeURIComponent(genre.name)}`}
                   className="glass rounded-xl p-4 border border-white/[0.07] hover:border-white/[0.14] transition-all group text-left card-hover"
                 >
                   <div
@@ -153,7 +154,7 @@ export default function SceneIndexPage() {
                     <span>Enter hub</span>
                     <ChevronRight className="w-3 h-3" />
                   </div>
-                </button>
+                </Link>
               ))}
             </div>
           </div>

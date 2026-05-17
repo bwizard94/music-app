@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { use, useState } from 'react';
 import Link from 'next/link';
 import { Zap, LayoutDashboard } from 'lucide-react';
 import { NOVA_VEGA } from '@/components/profile/artistData';
+import { ARTISTS } from '@/lib/data/artists';
+import { useAuth } from '@/components/providers/AuthProvider';
 import ProfileHero from '@/components/profile/ProfileHero';
 import OverviewTab from '@/components/profile/OverviewTab';
 import MusicPlayer from '@/components/profile/MusicPlayer';
@@ -21,14 +23,22 @@ const TABS = [
   { id: 'analytics', label: 'Analytics' },
 ];
 
-// In production this would use the slug param to fetch real artist data
-export default function ArtistProfilePage() {
-  const [activeTab, setActiveTab] = useState('overview');
-  const artist = NOVA_VEGA;
-  const color = artist.accentColor;
+export default function ArtistProfilePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+  const { profileSlug } = useAuth();
+  const isOwner = profileSlug === slug;
 
-  // Toggle isOwner to see owner vs visitor view
-  const isOwner = false;
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // For beta: use NOVA_VEGA's rich data for any slug, but with the correct artist metadata
+  const foundArtist = ARTISTS.find(a => a.slug === slug);
+  const artist = slug === 'nova-vega'
+    ? NOVA_VEGA
+    : (foundArtist
+        // NOVA_VEGA's stats/tracks/sets shape overrides the plain Artist type fields
+        ? ({ ...NOVA_VEGA, name: foundArtist.name, slug: foundArtist.slug, role: foundArtist.role, genres: foundArtist.genres, city: foundArtist.city, country: foundArtist.country, bio: foundArtist.bio, accentColor: foundArtist.accentColor } as typeof NOVA_VEGA)
+        : NOVA_VEGA);
+  const color = artist.accentColor;
 
   return (
     <div className="min-h-screen bg-[#060608]">

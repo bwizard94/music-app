@@ -1,7 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { Plus, LayoutDashboard, Zap, Calendar, MapPin, Users, TrendingUp, ChevronRight, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { LayoutDashboard, Zap, Calendar, MapPin, Users, TrendingUp, ChevronRight, Clock, AlertCircle } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
 import { EVENT_BUILDS } from '@/components/show-builder/showData';
 
 const STATUS_CONFIG = {
@@ -13,6 +16,11 @@ const STATUS_CONFIG = {
 };
 
 export default function ShowBuilderPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [acceptedInvites, setAcceptedInvites] = useState<Set<string>>(new Set());
+  const [declinedInvites, setDeclinedInvites] = useState<Set<string>>(new Set());
+
   return (
     <div className="min-h-screen bg-[#060608]">
       {/* Top nav */}
@@ -29,8 +37,8 @@ export default function ShowBuilderPage() {
             className="flex items-center gap-2 text-sm font-bold text-white px-4 py-2 rounded-xl relative overflow-hidden"
           >
             <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #a855f7, #a855f788)' }} />
-            <Plus className="w-4 h-4 relative" />
-            <span className="relative">New Event</span>
+            <Zap className="w-4 h-4 relative" />
+            <span className="relative">Open Workspace</span>
           </Link>
         </div>
       </nav>
@@ -75,7 +83,7 @@ export default function ShowBuilderPage() {
             <div className="flex items-center justify-between">
               <h2 className="text-white font-bold">Active Builds</h2>
               <Link href="/show-builder/neural-drift" className="text-purple-400 text-xs hover:text-purple-300 transition-colors flex items-center gap-1">
-                New build <Plus className="w-3 h-3" />
+                Open <ChevronRight className="w-3 h-3" />
               </Link>
             </div>
 
@@ -201,12 +209,25 @@ export default function ShowBuilderPage() {
                       <span className="text-slate-500 text-[10px]">{inv.from} · {inv.role}</span>
                     </div>
                     <div className="flex gap-2">
-                      <button className="flex-1 py-1.5 rounded-lg text-[10px] font-bold text-white relative overflow-hidden">
+                      <button
+                        onClick={() => {
+                          setAcceptedInvites(p => new Set([...p, inv.event]));
+                          toast({ type: 'success', title: 'Invite accepted', message: `You joined ${inv.event}` });
+                        }}
+                        className="flex-1 py-1.5 rounded-lg text-[10px] font-bold text-white relative overflow-hidden"
+                        disabled={acceptedInvites.has(inv.event) || declinedInvites.has(inv.event)}
+                      >
                         <div className="absolute inset-0" style={{ backgroundColor: inv.color }} />
-                        <span className="relative">Accept</span>
+                        <span className="relative">{acceptedInvites.has(inv.event) ? 'Joined!' : 'Accept'}</span>
                       </button>
-                      <button className="flex-1 py-1.5 rounded-lg text-[10px] font-semibold text-slate-400 border border-white/[0.08] hover:text-white transition-colors">
-                        Decline
+                      <button
+                        onClick={() => {
+                          setDeclinedInvites(p => new Set([...p, inv.event]));
+                        }}
+                        className="flex-1 py-1.5 rounded-lg text-[10px] font-semibold text-slate-400 border border-white/[0.08] hover:text-white transition-colors disabled:opacity-40"
+                        disabled={acceptedInvites.has(inv.event) || declinedInvites.has(inv.event)}
+                      >
+                        {declinedInvites.has(inv.event) ? 'Declined' : 'Decline'}
                       </button>
                     </div>
                   </div>
@@ -250,7 +271,7 @@ export default function ShowBuilderPage() {
                   { venue: 'Smart Bar', date: 'Jul 5', type: 'Late Night', cap: 200 },
                   { venue: 'Subterranean', date: 'Jul 19', type: 'Full Night', cap: 400 },
                 ].map((slot) => (
-                  <div key={slot.venue + slot.date} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/[0.03] transition-colors cursor-pointer group">
+                  <div key={slot.venue + slot.date} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/[0.03] transition-colors cursor-pointer group" onClick={() => router.push('/proposals/new')}>
                     <div className="text-center w-10">
                       <div className="text-white font-bold text-xs">{slot.date.split(' ')[1]}</div>
                       <div className="text-slate-600 text-[10px]">{slot.date.split(' ')[0]}</div>

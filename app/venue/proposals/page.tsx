@@ -1,11 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/providers/AuthProvider';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getVenueProposals } from '@/lib/services/proposals';
-// TODO: Replace with dynamic venue lookup when user has a venue profile
 import Link from 'next/link';
 import {
   Zap,
@@ -114,14 +111,25 @@ function StatCard({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function VenueProposalInboxPage() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<InboxTab>('all');
   const [sort, setSort] = useState<SortOption>('newest');
   const [sortOpen, setSortOpen] = useState(false);
+  const [proposals, setProposals] = useState(MOCK_PROPOSALS);
+
+  useEffect(() => {
+    if (!user) return;
+    getVenueProposals('the-blind-pig').then(({ data }) => {
+      if (data && data.length > 0) {
+        setProposals(data as unknown as typeof MOCK_PROPOSALS);
+      }
+    });
+  }, [user]);
 
   const venue = VENUES.find((v) => v.id === 'the-blind-pig') ?? VENUES[0];
 
   const filtered = sortProposals(
-    MOCK_PROPOSALS.filter((p) => tabMatchesStatus(activeTab, p.status)),
+    proposals.filter((p) => tabMatchesStatus(activeTab, p.status)),
     sort
   );
 

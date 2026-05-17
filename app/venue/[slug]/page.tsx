@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { use, useState } from 'react';
 import Link from 'next/link';
 import { LayoutDashboard, ChevronRight } from 'lucide-react';
 import { THE_BLIND_PIG } from '@/components/venue/venueData';
+import { useAuth } from '@/components/providers/AuthProvider';
 import VenueHero from '@/components/venue/VenueHero';
 import VenueOverview from '@/components/venue/VenueOverview';
 import VenueEvents from '@/components/venue/VenueEvents';
@@ -24,11 +25,15 @@ const TABS = [
 
 type TabId = typeof TABS[number]['id'];
 
-export default function VenuePage() {
+export default function VenuePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+  const { profileSlug } = useAuth();
+  const isOwner = profileSlug === slug;
+
+  // TODO: fetch by slug from Supabase
   const venue = THE_BLIND_PIG;
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [bookingOpen, setBookingOpen] = useState(false);
-  const isOwner = false;
   const color = venue.accentColor;
 
   return (

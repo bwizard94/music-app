@@ -12,6 +12,7 @@ export default function SignupPage() {
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [confirmationSent, setConfirmationSent] = useState(false);
 
   const passwordStrength = (() => {
     const p = form.password;
@@ -32,14 +33,45 @@ export default function SignupPage() {
     if (!agreed) return;
     setLoading(true);
     setError('');
-    const { error } = await signUp(form.email, form.password, form.name);
+    const { data, error } = await signUp(form.email, form.password, form.name);
     if (error) {
       setError(error.message);
       setLoading(false);
       return;
     }
-    window.location.href = '/onboarding';
+    if (data.session) {
+      // Logged in immediately (email confirmation disabled)
+      window.location.href = '/onboarding';
+    } else {
+      // Email confirmation required
+      setError('');
+      setLoading(false);
+      setConfirmationSent(true);
+    }
   };
+
+  if (confirmationSent) {
+    return (
+      <div className="min-h-screen relative flex items-center justify-center px-4">
+        <SceneBackground accentColor="#a855f7" intensity="medium" />
+        <div className="relative z-10 w-full max-w-md text-center">
+          <div className="glass rounded-2xl p-10 border border-white/[0.08]">
+            <div className="w-16 h-16 rounded-2xl bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-6">
+              <Check className="w-7 h-7 text-green-400" />
+            </div>
+            <h2 className="text-white font-bold text-2xl mb-3">Check your email</h2>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              We sent a confirmation link to <strong className="text-white">{form.email}</strong>.
+              Click it to activate your account and start onboarding.
+            </p>
+            <Link href="/login" className="mt-6 inline-flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors">
+              Back to sign in
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative flex items-center justify-center px-4 py-12">

@@ -5,10 +5,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Zap, LayoutDashboard, Search, CalendarDays, Users,
-  MessageSquare, Bookmark, Settings, Bell, ChevronRight,
+  MessageSquare, Bookmark, Settings, ChevronRight,
   Music2, MapPin, Sparkles, Menu, X, FileText, Building2,
 } from 'lucide-react';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { NotificationCenter } from '@/components/ui/Notification';
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard',    href: '/dashboard',   badge: null },
@@ -160,11 +161,8 @@ export default function Sidebar() {
           </div>
           <span className="text-white font-bold text-sm tracking-tight">STAGEFRONT</span>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="relative text-slate-400 hover:text-white transition-colors">
-            <Bell className="w-4.5 h-4.5" />
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full" />
-          </button>
+        <div className="flex items-center gap-2">
+          <NotificationCenter />
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="text-slate-400 hover:text-white transition-colors p-1"
