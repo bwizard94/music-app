@@ -178,7 +178,7 @@ export default function ProfileHero({ artist, isOwner, onTabChange }: Props) {
                     </button>
 
                     <a
-                      href="#"
+                      href="/messages"
                       className="flex items-center gap-2 glass rounded-xl px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
                     >
                       <MessageSquare className="w-3.5 h-3.5" />
@@ -186,7 +186,7 @@ export default function ProfileHero({ artist, isOwner, onTabChange }: Props) {
                     </a>
 
                     <a
-                      href="#"
+                      href="/proposals/new"
                       className="flex items-center gap-2 glass rounded-xl px-4 py-2.5 text-sm font-semibold hover:bg-white/10 transition-colors"
                       style={{ color }}
                     >
@@ -238,22 +238,61 @@ export default function ProfileHero({ artist, isOwner, onTabChange }: Props) {
 
         {/* ── Quick social links ─────────────────────────────────────── */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {[
-            { icon: Music2, label: 'SoundCloud', href: '#' },
-            { icon: Globe, label: 'Mixcloud', href: '#' },
-            { icon: Globe, label: 'Instagram', href: '#' },
-            { icon: Music2, label: 'Spotify', href: '#' },
-            { icon: ExtLink, label: 'Resident Advisor', href: '#' },
-          ].map(({ icon: Icon, label, href }) => (
+          {artist.socialLinks?.soundcloud && (
             <a
-              key={label}
-              href={href}
+              href={`https://${artist.socialLinks.soundcloud}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-1.5 glass rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:text-white border border-white/[0.06] hover:border-white/[0.14] transition-all"
             >
-              <Icon className="w-3 h-3" />
-              {label}
+              <Music2 className="w-3 h-3" />
+              SoundCloud
             </a>
-          ))}
+          )}
+          {artist.socialLinks?.mixcloud && (
+            <a
+              href={`https://${artist.socialLinks.mixcloud}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 glass rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:text-white border border-white/[0.06] hover:border-white/[0.14] transition-all"
+            >
+              <Globe className="w-3 h-3" />
+              Mixcloud
+            </a>
+          )}
+          {artist.socialLinks?.instagram && (
+            <a
+              href={`https://instagram.com/${artist.socialLinks.instagram.replace(/^@/, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 glass rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:text-white border border-white/[0.06] hover:border-white/[0.14] transition-all"
+            >
+              <Globe className="w-3 h-3" />
+              Instagram
+            </a>
+          )}
+          {artist.socialLinks?.spotify && (
+            <a
+              href={`https://${artist.socialLinks.spotify}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 glass rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:text-white border border-white/[0.06] hover:border-white/[0.14] transition-all"
+            >
+              <Music2 className="w-3 h-3" />
+              Spotify
+            </a>
+          )}
+          {artist.socialLinks?.residentAdvisor && (
+            <a
+              href={`https://${artist.socialLinks.residentAdvisor}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 glass rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:text-white border border-white/[0.06] hover:border-white/[0.14] transition-all"
+            >
+              <ExtLink className="w-3 h-3" />
+              Resident Advisor
+            </a>
+          )}
         </div>
       </div>
     </div>

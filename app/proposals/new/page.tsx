@@ -26,6 +26,8 @@ import {
   type ProposalLineupArtist,
   type ProposalCollaborator,
 } from '@/lib/data/proposals';
+import { createProposal } from '@/lib/services/proposals';
+import { useAuth } from '@/components/providers/AuthProvider';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -119,6 +121,7 @@ const STEP_LABELS = [
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function NewProposalPage() {
+  const { user, profile } = useAuth();
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<ProposalDraft>(INITIAL_DRAFT);
   const [artistSearch, setArtistSearch] = useState('');
@@ -211,9 +214,43 @@ export default function NewProposalPage() {
     if (step > 1) setStep((s) => s - 1);
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
+    if (!user || !selectedVenue) {
+      setSubmitState('loading');
+      setTimeout(() => setSubmitState('done'), 2200);
+      return;
+    }
     setSubmitState('loading');
-    setTimeout(() => setSubmitState('done'), 2200);
+    try {
+      await createProposal({
+        submitted_by_id: user.id,
+        submitted_by_name: profile?.display_name ?? user.email ?? 'Unknown',
+        submitted_by_role: profile?.role ?? 'artist',
+        submitted_by_image: profile?.avatar_url ?? null,
+        venue_id: selectedVenue.id,
+        venue_name: selectedVenue.name,
+        venue_city: selectedVenue.city,
+        venue_capacity: selectedVenue.capacity,
+        name: draft.name,
+        tagline: draft.tagline || null,
+        genres: draft.genres,
+        proposed_date: draft.proposedDate,
+        doors_time: draft.doorsTime || null,
+        end_time: draft.endTime || null,
+        status: 'pending',
+        estimated_draw: draft.estimatedDraw,
+        total_artist_fees: totalArtistFees,
+        production_budget: draft.productionBudget,
+        marketing_budget: draft.marketingBudget,
+        ticket_price: draft.ticketPrice || null,
+        revenue_split: draft.revenueSplit || null,
+        budget_notes: draft.budgetNotes || null,
+        accent_color: draft.accentColor,
+      });
+    } catch {
+      // Continue with demo mode if Supabase isn't configured
+    }
+    setSubmitState('done');
   }
 
   function handleReset() {

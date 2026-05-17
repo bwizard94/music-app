@@ -42,10 +42,17 @@ export default function OverviewTab({ artist }: Props) {
           <div className="glass rounded-2xl overflow-hidden border border-white/[0.07]">
             <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.05]">
               <h3 className="text-white font-bold text-sm">Featured Video</h3>
-              <a href="#" className="text-xs text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1">
-                <ExternalLink className="w-3 h-3" />
-                YouTube
-              </a>
+              {artist.videos[0].url && artist.videos[0].url !== '#' ? (
+                <a
+                  href={artist.videos[0].url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-slate-500 hover:text-slate-300 transition-colors flex items-center gap-1"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  {artist.videos[0].platform}
+                </a>
+              ) : null}
             </div>
             <div className="relative group cursor-pointer">
               <img
@@ -145,7 +152,9 @@ export default function OverviewTab({ artist }: Props) {
               {artist.upcomingShows[0].date} · {artist.upcomingShows[0].time}
             </div>
             <a
-              href="#"
+              href={artist.upcomingShows[0].ticketUrl && artist.upcomingShows[0].ticketUrl !== '#' ? artist.upcomingShows[0].ticketUrl : '/signup'}
+              target={artist.upcomingShows[0].ticketUrl && artist.upcomingShows[0].ticketUrl !== '#' ? '_blank' : undefined}
+              rel={artist.upcomingShows[0].ticketUrl && artist.upcomingShows[0].ticketUrl !== '#' ? 'noopener noreferrer' : undefined}
               className="inline-block mt-3 text-xs font-semibold px-4 py-2 rounded-lg relative"
               style={{ backgroundColor: `${color}20`, color }}
             >
@@ -161,10 +170,21 @@ export default function OverviewTab({ artist }: Props) {
             Links
           </h4>
           <div className="space-y-2">
-            {Object.entries(artist.socialLinks).map(([platform, handle]) => (
+            {Object.entries(artist.socialLinks).map(([platform, handle]) => {
+              let href = '#';
+              if (platform === 'instagram') {
+                href = `https://instagram.com/${String(handle).replace(/^@/, '')}`;
+              } else if (String(handle).startsWith('http')) {
+                href = String(handle);
+              } else {
+                href = `https://${String(handle)}`;
+              }
+              return (
               <a
                 key={platform}
-                href="#"
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.05] transition-colors group"
               >
                 <div className="flex items-center gap-2.5">
@@ -181,7 +201,8 @@ export default function OverviewTab({ artist }: Props) {
                 </div>
                 <ExternalLink className="w-3 h-3 text-slate-700 group-hover:text-slate-400 transition-colors" />
               </a>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

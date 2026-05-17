@@ -74,7 +74,7 @@ export default function FeaturedEvents() {
             </h2>
           </div>
           <a
-            href="#"
+            href="/signup"
             className="hidden md:flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors group"
           >
             View all events
@@ -158,7 +158,7 @@ export default function FeaturedEvents() {
                   <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
                     <span className="text-white font-semibold text-sm">{event.price}</span>
                     <a
-                      href="#"
+                      href="/signup"
                       className="flex items-center gap-1.5 text-xs font-semibold text-white px-4 py-2 rounded-lg transition-all duration-300"
                       style={{
                         backgroundColor: `${event.color}20`,

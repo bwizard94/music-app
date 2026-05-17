@@ -172,13 +172,13 @@ export default function Hero() {
             <ArrowRight className="relative w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
           <a
-            href="#"
+            href="/discover"
             className="flex items-center gap-3 font-semibold text-white glass px-8 py-4 rounded-xl text-base hover:bg-white/10 transition-all duration-300 group"
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
               <Play className="w-3 h-3 text-white fill-white ml-0.5" />
             </div>
-            Watch the Demo
+            Explore the Scene
           </a>
         </div>
 

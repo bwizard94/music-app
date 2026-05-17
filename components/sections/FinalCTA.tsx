@@ -57,7 +57,7 @@ export default function FinalCTA() {
         {/* Dual CTA */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
           <a
-            href="#"
+            href="/signup"
             className="group relative flex items-center gap-3 font-bold text-white px-10 py-5 rounded-xl overflow-hidden text-base w-full sm:w-auto justify-center"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-size-200 group-hover:translate-x-full transition-none" />
@@ -66,7 +66,7 @@ export default function FinalCTA() {
             <ArrowRight className="relative w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </a>
           <a
-            href="#"
+            href="/signup"
             className="group relative flex items-center gap-3 font-bold text-white px-10 py-5 rounded-xl overflow-hidden text-base w-full sm:w-auto justify-center"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-rose-600 to-amber-600 group-hover:from-amber-600 group-hover:to-rose-600 transition-all duration-500" />

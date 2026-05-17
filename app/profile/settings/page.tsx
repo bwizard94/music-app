@@ -287,6 +287,8 @@ function PreviewPane({
   name: string; bio: string; city: string; genres: string[];
   avatar: string; banner: string; accentColor: string;
 }) {
+  const { profileSlug } = useAuth();
+  const myProfileHref = profileSlug ? `/profile/${profileSlug}` : '#';
   return (
     <div className="w-72 flex-shrink-0 border-l border-white/[0.06] bg-[#08080f] overflow-y-auto">
       <div className="p-4 border-b border-white/[0.05]">
@@ -347,7 +349,7 @@ function PreviewPane({
         </p>
 
         <Link
-          href="/profile/nova-vega"
+          href={myProfileHref}
           className="flex items-center justify-center gap-1.5 mt-2 text-xs text-purple-400 hover:text-purple-300 transition-colors"
         >
           <ExternalLink className="w-3 h-3" /> View full profile
@@ -1102,6 +1104,8 @@ function PrivacyTab({ onDirty }: { onDirty: () => void }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function ProfileSettingsPage() {
+  const { profileSlug } = useAuth();
+  const myProfileHref = profileSlug ? `/profile/${profileSlug}` : '#';
   const [activeTab, setActiveTab]   = useState('profile');
   const [showPreview, setShowPreview] = useState(false);
   const [globalDirty, setGlobalDirty] = useState(false);
@@ -1129,7 +1133,7 @@ export default function ProfileSettingsPage() {
             <Zap className="w-3.5 h-3.5 text-white fill-white" />
           </div>
           <Link
-            href="/profile/nova-vega"
+            href={myProfileHref}
             className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -1215,7 +1219,7 @@ export default function ProfileSettingsPage() {
                 </div>
 
                 <Link
-                  href="/profile/nova-vega"
+                  href={myProfileHref}
                   className="flex items-center justify-center gap-1.5 mt-3 text-xs text-slate-600 hover:text-purple-400 transition-colors"
                 >
                   <Eye className="w-3 h-3" /> View public profile

@@ -52,7 +52,7 @@ export default function CreativeRoles() {
             return (
               <a
                 key={role.label}
-                href="#"
+                href="/signup"
                 className="group card-hover"
               >
                 <div className="glass rounded-xl p-4 text-center hover:border-white/15 transition-all duration-300">

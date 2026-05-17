@@ -7,6 +7,7 @@ import {
   CheckCircle2, AlertCircle, Users, Music2, Wrench, Building2, Zap, Search, SlidersHorizontal,
 } from 'lucide-react';
 import { BOARD_POSTS, type BoardPost } from '@/components/scene/sceneData';
+import { useToast } from '@/components/ui/Toast';
 
 const TYPE_CONFIG = {
   'open-slot':           { label: 'Open Slot',          color: '#c026d3', icon: Building2 },
@@ -21,14 +22,50 @@ const FILTER_TYPES = ['All', 'Open Slots', 'Musician Wanted', 'Collab Requests',
 const FILTER_CITIES = ['All Cities', 'Chicago, IL', 'Detroit, MI', 'New York, NY', 'Berlin, DE', 'London, UK'];
 
 export default function BoardPage() {
+  const { toast } = useToast();
   const [typeFilter, setTypeFilter] = useState<typeof FILTER_TYPES[number]>('All');
   const [cityFilter, setCityFilter] = useState('All Cities');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [responded, setResponded] = useState<Set<string>>(new Set());
   const [showPostForm, setShowPostForm] = useState(false);
+  const [posts, setPosts] = useState<BoardPost[]>(BOARD_POSTS);
 
-  const filtered = BOARD_POSTS.filter((p) => {
+  // Post form state
+  const [postTitle, setPostTitle] = useState('');
+  const [postBody, setPostBody] = useState('');
+  const [postTags, setPostTags] = useState('');
+  const [postType, setPostType] = useState<BoardPost['type']>('open-slot');
+  const [submitting, setSubmitting] = useState(false);
+
+  function handlePost() {
+    if (!postTitle.trim() || !postBody.trim()) return;
+    setSubmitting(true);
+    const newPost: BoardPost = {
+      id: `post-${Date.now()}`,
+      type: postType,
+      title: postTitle.trim(),
+      body: postBody.trim(),
+      author: 'You',
+      authorRole: 'Artist',
+      authorImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=80',
+      city: 'Chicago, IL',
+      time: 'Just now',
+      tags: postTags.split(',').map((t) => t.trim()).filter(Boolean),
+      accentColor: '#a855f7',
+      responses: 0,
+      interested: 0,
+    };
+    setPosts((prev) => [newPost, ...prev]);
+    setPostTitle('');
+    setPostBody('');
+    setPostTags('');
+    setShowPostForm(false);
+    setSubmitting(false);
+    toast({ type: 'success', title: 'Posted!', message: 'Your post is now live on the board.' });
+  }
+
+  const filtered = posts.filter((p) => {
     const q = searchQuery.toLowerCase();
     if (q && !p.title.toLowerCase().includes(q) && !p.body.toLowerCase().includes(q) && !p.tags.join(' ').toLowerCase().includes(q)) return false;
     if (cityFilter !== 'All Cities' && p.city !== cityFilter) return false;
@@ -88,21 +125,48 @@ export default function BoardPage() {
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 {Object.entries(TYPE_CONFIG).map(([type, cfg]) => (
-                  <button key={type} className="flex items-center gap-2 p-2.5 rounded-xl border border-white/[0.07] text-xs font-semibold hover:border-white/[0.14] transition-all text-left"
-                    style={{ color: cfg.color }}>
+                  <button
+                    key={type}
+                    onClick={() => setPostType(type as BoardPost['type'])}
+                    className="flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold hover:border-white/[0.14] transition-all text-left"
+                    style={{
+                      color: cfg.color,
+                      borderColor: postType === type ? cfg.color : 'rgba(255,255,255,0.07)',
+                      backgroundColor: postType === type ? `${cfg.color}15` : 'transparent',
+                    }}
+                  >
                     <cfg.icon className="w-3.5 h-3.5" />
                     {cfg.label}
                   </button>
                 ))}
               </div>
-              <input placeholder="Post title…" className="w-full glass rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-600 outline-none bg-white/[0.03] border border-white/[0.06]" />
-              <textarea placeholder="Describe what you need, offer, or want to discuss…" rows={3}
-                className="w-full glass rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-600 outline-none bg-white/[0.03] border border-white/[0.06] resize-none" />
+              <input
+                value={postTitle}
+                onChange={(e) => setPostTitle(e.target.value)}
+                placeholder="Post title…"
+                className="w-full glass rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-600 outline-none bg-white/[0.03] border border-white/[0.06]"
+              />
+              <textarea
+                value={postBody}
+                onChange={(e) => setPostBody(e.target.value)}
+                placeholder="Describe what you need, offer, or want to discuss…"
+                rows={3}
+                className="w-full glass rounded-xl px-4 py-2.5 text-white text-sm placeholder-slate-600 outline-none bg-white/[0.03] border border-white/[0.06] resize-none"
+              />
               <div className="flex gap-2">
-                <input placeholder="Tags (genre, city, type…)" className="flex-1 glass rounded-xl px-4 py-2.5 text-white text-xs placeholder-slate-600 outline-none bg-white/[0.03] border border-white/[0.06]" />
-                <button className="px-4 py-2.5 rounded-xl text-xs font-bold text-white relative overflow-hidden">
+                <input
+                  value={postTags}
+                  onChange={(e) => setPostTags(e.target.value)}
+                  placeholder="Tags (genre, city, type…)"
+                  className="flex-1 glass rounded-xl px-4 py-2.5 text-white text-xs placeholder-slate-600 outline-none bg-white/[0.03] border border-white/[0.06]"
+                />
+                <button
+                  onClick={handlePost}
+                  disabled={!postTitle.trim() || !postBody.trim() || submitting}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold text-white relative overflow-hidden disabled:opacity-50"
+                >
                   <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #a855f7, #a855f788)' }} />
-                  <span className="relative">Post</span>
+                  <span className="relative">{submitting ? 'Posting…' : 'Post'}</span>
                 </button>
               </div>
             </div>
@@ -137,7 +201,6 @@ export default function BoardPage() {
           <div className="flex gap-1.5 overflow-x-auto pb-1">
             {FILTER_TYPES.map((f) => {
               const isActive = typeFilter === f;
-              const matchedType = Object.entries(TYPE_CONFIG).find(([, cfg]) => cfg.label + 's' === f || (f === 'Open Slots' && true));
               return (
                 <button
                   key={f}
@@ -170,7 +233,7 @@ export default function BoardPage() {
         {/* Stats */}
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
           {Object.entries(TYPE_CONFIG).map(([type, cfg]) => {
-            const count = BOARD_POSTS.filter((p) => p.type === type).length;
+            const count = posts.filter((p) => p.type === type).length;
             return (
               <div key={type} className="glass rounded-xl p-3 text-center border border-white/[0.06]">
                 <cfg.icon className="w-4 h-4 mx-auto mb-1.5" style={{ color: cfg.color }} />
@@ -301,7 +364,7 @@ function BoardPostCard({ post, responded, onRespond }: {
                 : { backgroundColor: `${cfg.color}18`, border: `1px solid ${cfg.color}40`, color: cfg.color }
               }
             >
-              {responded ? <><CheckCircle2 className="w-3 h-3" />Responded</> : <>I\'m Interested</>}
+              {responded ? <><CheckCircle2 className="w-3 h-3" />Responded</> : <>I&apos;m Interested</>}
             </button>
             <div className="flex items-center gap-1 text-slate-600 text-xs">
               <MessageSquare className="w-3 h-3" />

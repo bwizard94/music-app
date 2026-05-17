@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Menu, X, Zap } from 'lucide-react';
 
 const navLinks = [
@@ -32,7 +33,7 @@ export default function Navigation() {
       >
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-2 group">
+          <Link href="/" className="flex items-center gap-2 group">
             <div className="relative w-8 h-8">
               <div className="absolute inset-0 bg-purple-500 rounded-lg opacity-20 group-hover:opacity-40 transition-opacity blur-sm" />
               <div className="relative w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
@@ -42,7 +43,7 @@ export default function Navigation() {
             <span className="text-white font-bold text-lg tracking-tight">
               STAGEFRONT
             </span>
-          </a>
+          </Link>
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-1">

@@ -101,7 +101,7 @@ export default function LocalScenes() {
           {scenes.map((scene) => (
             <a
               key={scene.city}
-              href="#"
+              href="/scene"
               className="group card-hover block"
             >
               <div className="relative glass rounded-2xl overflow-hidden hover:border-white/15 transition-all duration-300">
@@ -173,7 +173,7 @@ export default function LocalScenes() {
             + Atlanta, Seattle, Denver, Miami, Nashville, and 12 more cities
           </p>
           <a
-            href="#"
+            href="/scene"
             className="inline-flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors font-medium"
           >
             View all scenes

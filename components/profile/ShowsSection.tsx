@@ -92,7 +92,7 @@ export default function ShowsSection({ artist }: Props) {
                     <span className="text-slate-600">with</span>
                     {show.withArtists.map((a, i) => (
                       <span key={a}>
-                        <a href="#" className="text-slate-400 hover:text-white transition-colors font-medium">
+                        <a href="/discover" className="text-slate-400 hover:text-white transition-colors font-medium">
                           {a}
                         </a>
                         {i < show.withArtists.length - 1 && (
@@ -107,7 +107,9 @@ export default function ShowsSection({ artist }: Props) {
               {/* Ticket CTA */}
               <div className="flex-shrink-0 self-center">
                 <a
-                  href={show.ticketUrl}
+                  href={show.ticketUrl && show.ticketUrl !== '#' ? show.ticketUrl : '/signup'}
+                  target={show.ticketUrl && show.ticketUrl !== '#' ? '_blank' : undefined}
+                  rel={show.ticketUrl && show.ticketUrl !== '#' ? 'noopener noreferrer' : undefined}
                   className="flex items-center gap-2 glass rounded-xl px-4 py-2.5 text-xs font-semibold hover:bg-white/10 transition-all border border-white/[0.08] hover:border-white/[0.16] text-slate-300 hover:text-white"
                 >
                   <Ticket className="w-3.5 h-3.5" />

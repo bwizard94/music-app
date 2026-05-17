@@ -6,7 +6,7 @@ import { signOut } from '@/lib/services/auth';
 import { useAuth } from '@/components/providers/AuthProvider';
 
 export default function TopBar() {
-  const { profile } = useAuth();
+  const { profile, profileSlug } = useAuth();
 
   const handleSignOut = async () => {
     await signOut();
@@ -34,7 +34,7 @@ export default function TopBar() {
         {/* Right actions */}
         <div className="flex items-center gap-2 ml-auto">
           <a
-            href="#"
+            href="/board"
             className="hidden sm:flex items-center gap-2 relative font-semibold text-white text-xs px-4 py-2.5 rounded-xl overflow-hidden group"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 group-hover:from-pink-600 group-hover:to-purple-600 transition-all duration-500" />

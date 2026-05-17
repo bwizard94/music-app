@@ -9,6 +9,7 @@ import {
   Loader2, Calendar, Settings2, Mic2, Lightbulb,
   FileText, Clock, ExternalLink, Users,
 } from 'lucide-react';
+import { useAuth } from '@/components/providers/AuthProvider';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -206,6 +207,8 @@ function VenuePreviewPane({
   name: string; tagline: string; city: string; state: string;
   capacity: number; genres: string[]; banner: string; accentColor: string;
 }) {
+  const { profileSlug } = useAuth();
+  const myVenueHref = profileSlug ? `/venue/${profileSlug}` : '/venue/settings';
   return (
     <div className="w-72 flex-shrink-0 border-l border-white/[0.06] bg-[#08080f] overflow-y-auto">
       <div className="p-4 border-b border-white/[0.05]">
@@ -264,7 +267,7 @@ function VenuePreviewPane({
         </p>
 
         <Link
-          href="/venue/blind-pig"
+          href={myVenueHref}
           className="flex items-center justify-center gap-1.5 mt-2 text-xs text-purple-400 hover:text-purple-300 transition-colors"
         >
           <ExternalLink className="w-3 h-3" /> View full venue page
@@ -1101,6 +1104,8 @@ function VenuePrivacyTab({ onDirty }: { onDirty: () => void }) {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function VenueSettingsPage() {
+  const { profileSlug } = useAuth();
+  const myVenueHref = profileSlug ? `/venue/${profileSlug}` : '/venue/settings';
   const [activeTab, setActiveTab]     = useState('info');
   const [showPreview, setShowPreview]  = useState(false);
   const [globalDirty, setGlobalDirty] = useState(false);
@@ -1127,7 +1132,7 @@ export default function VenueSettingsPage() {
           <div className="w-7 h-7 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
             <Zap className="w-3.5 h-3.5 text-white fill-white" />
           </div>
-          <Link href="/venue/blind-pig" className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 text-sm transition-colors">
+          <Link href={myVenueHref} className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 text-sm transition-colors">
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Back to Venue</span>
           </Link>
@@ -1201,7 +1206,7 @@ export default function VenueSettingsPage() {
                 </div>
 
                 <Link
-                  href="/venue/blind-pig"
+                  href={myVenueHref}
                   className="flex items-center justify-center gap-1.5 mt-3 text-xs text-slate-600 hover:text-purple-400 transition-colors"
                 >
                   <Eye className="w-3 h-3" /> View public venue page

@@ -170,7 +170,7 @@ export default function VenueHero({ venue, isOwner, onBook }: Props) {
                     </button>
 
                     <a
-                      href="#"
+                      href="/messages"
                       className="flex items-center gap-2 glass rounded-xl px-4 py-3 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
                     >
                       <MessageSquare className="w-3.5 h-3.5" />
@@ -214,21 +214,50 @@ export default function VenueHero({ venue, isOwner, onBook }: Props) {
 
         {/* ── Quick links ───────────────────────────────────────────── */}
         <div className="flex flex-wrap gap-2 mb-6">
-          {[
-            { label: 'Resident Advisor', icon: ExternalLink },
-            { label: 'Instagram', icon: Globe },
-            { label: 'Website', icon: Globe },
-            { label: 'Mixcloud', icon: ExternalLink },
-          ].map(({ label, icon: Icon }) => (
+          {venue.socialLinks?.residentAdvisor && (
             <a
-              key={label}
-              href="#"
+              href={`https://${venue.socialLinks.residentAdvisor}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-1.5 glass rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:text-white border border-white/[0.06] hover:border-white/[0.14] transition-all"
             >
-              <Icon className="w-3 h-3" />
-              {label}
+              <ExternalLink className="w-3 h-3" />
+              Resident Advisor
             </a>
-          ))}
+          )}
+          {venue.socialLinks?.instagram && (
+            <a
+              href={`https://instagram.com/${String(venue.socialLinks.instagram).replace(/^@/, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 glass rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:text-white border border-white/[0.06] hover:border-white/[0.14] transition-all"
+            >
+              <Globe className="w-3 h-3" />
+              Instagram
+            </a>
+          )}
+          {venue.socialLinks?.website && (
+            <a
+              href={`https://${venue.socialLinks.website}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 glass rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:text-white border border-white/[0.06] hover:border-white/[0.14] transition-all"
+            >
+              <Globe className="w-3 h-3" />
+              Website
+            </a>
+          )}
+          {venue.socialLinks?.mixcloud && (
+            <a
+              href={`https://${venue.socialLinks.mixcloud}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 glass rounded-lg px-3 py-1.5 text-xs text-slate-400 hover:text-white border border-white/[0.06] hover:border-white/[0.14] transition-all"
+            >
+              <ExternalLink className="w-3 h-3" />
+              Mixcloud
+            </a>
+          )}
 
           {/* Open slots badge */}
           <div

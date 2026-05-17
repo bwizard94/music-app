@@ -8,6 +8,7 @@ import {
   MessageSquare, Bookmark, Settings, Bell, ChevronRight,
   Music2, MapPin, Sparkles, Menu, X, FileText, Building2,
 } from 'lucide-react';
+import { useAuth } from '@/components/providers/AuthProvider';
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Dashboard',    href: '/dashboard',   badge: null },
@@ -28,6 +29,8 @@ const QUICK_LINKS = [
 export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const { profile, profileSlug } = useAuth();
+  const myProfileHref = profileSlug ? `/profile/${profileSlug}` : '/profile/settings';
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
@@ -41,17 +44,17 @@ export default function Sidebar() {
 
       {/* User card */}
       <div className="mx-3 mb-5">
-        <Link href="/profile/nova-vega" className="glass rounded-xl p-3 flex items-center gap-3 border border-white/[0.06] hover:border-white/[0.12] transition-colors block">
+        <Link href={myProfileHref} className="glass rounded-xl p-3 flex items-center gap-3 border border-white/[0.06] hover:border-white/[0.12] transition-colors block">
           <div className="relative w-9 h-9 flex-shrink-0">
             <img
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=80"
+              src={profile?.avatar_url ?? "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=80"}
               alt="User"
               className="w-full h-full rounded-lg object-cover"
             />
             <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-[#0c0c14]" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-white font-semibold text-sm truncate">NOVA VEGA</div>
+            <div className="text-white font-semibold text-sm truncate">{profile?.display_name ?? 'My Profile'}</div>
             <div className="text-slate-500 text-xs">DJ · Chicago, IL</div>
           </div>
           <div className="flex-shrink-0 w-5 h-5 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
@@ -114,13 +117,13 @@ export default function Sidebar() {
 
       {/* Bottom */}
       <div className="px-3 pb-4 space-y-0.5">
-        <a
-          href="#"
+        <Link
+          href="/profile/settings"
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-600 hover:text-slate-300 hover:bg-white/[0.04] transition-all duration-200"
         >
           <Settings className="w-4 h-4" />
           Settings
-        </a>
+        </Link>
         {/* Profile complete nudge */}
         <div className="glass rounded-xl p-3 mt-3 border border-amber-500/15">
           <div className="flex items-start gap-2 mb-2">
@@ -131,6 +134,12 @@ export default function Sidebar() {
             <div className="h-full w-[60%] bg-gradient-to-r from-amber-500 to-orange-500 rounded-full" />
           </div>
           <p className="text-slate-600 text-xs">60% complete · 3 items left</p>
+          <Link
+            href="/signup"
+            className="mt-2 block text-xs text-purple-400 hover:text-purple-300 transition-colors font-semibold"
+          >
+            Upgrade to Pro →
+          </Link>
         </div>
       </div>
     </div>

@@ -21,13 +21,11 @@ const QUICK_STATS = [
   { label: 'Upcoming Shows',      value: '4',     change: 'Next: May 23',   icon: CalendarDays, color: '#f59e0b' },
 ];
 
-const QUICK_ACTIONS = [
+const STATIC_QUICK_ACTIONS = [
   { label: 'Create Show Proposal', icon: Zap,        href: '/show-builder',  color: '#a855f7' },
   { label: 'Find Collaborators',   icon: Users,       href: '/discover',      color: '#06b6d4' },
   { label: 'Browse Venues',        icon: Building2,   href: '/discover',      color: '#f43f5e' },
   { label: 'Post Opportunity',     icon: Mic2,        href: '/board',         color: '#f59e0b' },
-  { label: 'Update Profile',       icon: UserCheck,   href: '/profile/nova-vega', color: '#10b981' },
-  { label: 'View Analytics',       icon: BarChart3,   href: '/profile/nova-vega', color: '#ec4899' },
 ];
 
 const BOOKING_REQUESTS = [
@@ -197,13 +195,32 @@ const CURRENT_USER = {
 
 export default function DashboardPage() {
   const { toast } = useToast();
-  const { profile } = useAuth();
+  const { profile, profileSlug, loading } = useAuth();
   const [bookingStates, setBookingStates] = useState<Record<string, 'pending' | 'accepted' | 'declined'>>({
     br1: 'pending', br2: 'pending', br3: 'pending',
   });
   const [collabStates, setCollabStates] = useState<Record<string, 'pending' | 'accepted' | 'declined'>>({
     ci1: 'pending', ci2: 'pending',
   });
+
+  const myProfileHref = profileSlug ? `/profile/${profileSlug}` : '/profile/settings';
+
+  const quickActions = [
+    ...STATIC_QUICK_ACTIONS,
+    { label: 'Update Profile', icon: UserCheck, href: myProfileHref, color: '#10b981' },
+    { label: 'View Analytics', icon: BarChart3,  href: myProfileHref, color: '#ec4899' },
+  ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#060608] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
+          <p className="text-slate-600 text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 md:px-6 py-6 max-w-screen-2xl mx-auto">
@@ -262,7 +279,7 @@ export default function DashboardPage() {
 
           {/* CTA */}
           <Link
-            href="/profile/nova-vega"
+            href={myProfileHref}
             className="relative flex items-center gap-2 text-sm font-bold text-white px-5 py-2.5 rounded-xl overflow-hidden group flex-shrink-0"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 group-hover:from-pink-600 group-hover:to-purple-600 transition-all duration-500" />
@@ -294,7 +311,7 @@ export default function DashboardPage() {
       <div className="glass rounded-2xl border border-white/[0.06] px-5 py-4 mb-6">
         <p className="text-[10px] text-slate-700 font-bold uppercase tracking-widest mb-3">Quick Actions</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2">
-          {QUICK_ACTIONS.map(({ label, icon: Icon, href, color }) => (
+          {quickActions.map(({ label, icon: Icon, href, color }) => (
             <Link
               key={label}
               href={href}
@@ -614,7 +631,7 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </div>
-              <Link href="/profile/nova-vega"
+              <Link href={myProfileHref}
                 className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-bold text-amber-400 border border-amber-500/20 hover:border-amber-500/40 hover:bg-amber-500/05 transition-all duration-200">
                 Complete Profile <ArrowRight className="w-3 h-3" />
               </Link>

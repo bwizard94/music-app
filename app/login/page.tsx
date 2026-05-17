@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Zap, Eye, EyeOff, ArrowRight, Music } from 'lucide-react';
 import SceneBackground from '@/components/ui/SceneBackground';
 import { signIn, signInWithGoogle, signInWithApple } from '@/lib/services/auth';
+import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,6 +13,22 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+
+  async function handleForgotPassword() {
+    if (!email.trim()) {
+      setError('Enter your email above first.');
+      return;
+    }
+    setResetLoading(true);
+    const supabase = createClient();
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/callback?next=/profile/settings`,
+    });
+    setResetSent(true);
+    setResetLoading(false);
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,12 +122,14 @@ export default function LoginPage() {
                 <label className="block text-xs font-medium text-slate-400">
                   Password
                 </label>
-                <a
-                  href="#"
-                  className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={resetLoading}
+                  className="text-xs text-slate-500 hover:text-white transition-colors disabled:opacity-50"
                 >
-                  Forgot password?
-                </a>
+                  {resetSent ? 'Reset email sent!' : 'Forgot password?'}
+                </button>
               </div>
               <div className="relative">
                 <input

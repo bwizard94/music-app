@@ -67,10 +67,17 @@ export default function MusicPlayer({ artist }: Props) {
             <Headphones className="w-4 h-4" style={{ color }} />
             <span className="text-white font-bold text-sm">Discography</span>
           </div>
-          <a href="#" className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors">
-            <ExternalLink className="w-3 h-3" />
-            Open on Spotify
-          </a>
+          {artist.socialLinks?.spotify ? (
+            <a
+              href={`https://${artist.socialLinks.spotify}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+            >
+              <ExternalLink className="w-3 h-3" />
+              Open on Spotify
+            </a>
+          ) : null}
         </div>
 
         {/* Main player area */}
@@ -248,9 +255,16 @@ export default function MusicPlayer({ artist }: Props) {
       <div className="glass rounded-2xl overflow-hidden border border-white/[0.07]">
         <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.05]">
           <span className="text-white font-bold text-sm">DJ Sets & Mixes</span>
-          <a href="#" className="text-xs text-slate-500 hover:text-slate-300 transition-colors">
-            View all on Mixcloud →
-          </a>
+          {artist.socialLinks?.mixcloud ? (
+            <a
+              href={`https://${artist.socialLinks.mixcloud}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+            >
+              View all on Mixcloud →
+            </a>
+          ) : null}
         </div>
         <div className="divide-y divide-white/[0.04]">
           {artist.sets.map((set) => (

@@ -78,7 +78,7 @@ export default function FeaturedVenues() {
             </h2>
           </div>
           <a
-            href="#"
+            href="/discover"
             className="hidden md:flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors group"
           >
             Explore venues
@@ -181,7 +181,7 @@ export default function FeaturedVenues() {
             </div>
             <div className="flex-shrink-0">
               <a
-                href="#"
+                href="/signup"
                 className="relative flex items-center gap-2 font-semibold text-white px-8 py-4 rounded-xl overflow-hidden group"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-rose-600 to-amber-600 group-hover:from-amber-600 group-hover:to-rose-600 transition-all duration-500" />
