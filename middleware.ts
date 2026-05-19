@@ -1,15 +1,39 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Routes that require a logged-in session
 const PROTECTED_PATHS = [
   '/dashboard', '/profile/settings', '/venue/settings',
   '/show-builder', '/proposals', '/messages', '/discover',
-  '/board', '/scene',
+  '/board', '/scene', '/admin',
 ]
+
+// Routes that logged-in users should not visit
 const AUTH_PATHS = ['/login', '/signup']
+
+// Security headers added to every response
+const SECURITY_HEADERS: Record<string, string> = {
+  'X-Frame-Options': 'SAMEORIGIN',
+  'X-Content-Type-Options': 'nosniff',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+}
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
+
+  // Add security headers to all responses
+  Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
+    supabaseResponse.headers.set(key, value)
+  })
+
+  // Only run auth check when Supabase is configured
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+  const isConfigured = supabaseUrl.length > 0 && !supabaseUrl.includes('placeholder')
+
+  if (!isConfigured) {
+    return supabaseResponse
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,6 +44,10 @@ export async function middleware(request: NextRequest) {
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({ request })
+          // Re-apply security headers after response recreation
+          Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
+            supabaseResponse.headers.set(key, value)
+          })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
@@ -28,18 +56,15 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // IMPORTANT: Don't write logic between createServerClient and getUser() call
+  // IMPORTANT: Do not write logic between createServerClient and getUser()
   const { data: { user } } = await supabase.auth.getUser()
   const path = request.nextUrl.pathname
 
   const isProtected = PROTECTED_PATHS.some(p => path === p || path.startsWith(p + '/'))
   if (isProtected && !user) {
-    // With placeholder env vars, skip redirect to avoid breaking development
-    // Only redirect if SUPABASE_URL is configured (not placeholder)
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-    if (!supabaseUrl.includes('placeholder')) {
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('redirect', path)
+    return NextResponse.redirect(loginUrl)
   }
 
   if (user && AUTH_PATHS.includes(path)) {

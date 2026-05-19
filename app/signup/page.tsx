@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Zap, Eye, EyeOff, ArrowRight, Check } from 'lucide-react';
 import SceneBackground from '@/components/ui/SceneBackground';
 import { signUp } from '@/lib/services/auth';
+import { validateEmail, validatePassword, validateDisplayName } from '@/lib/validation';
 
 export default function SignupPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
@@ -31,19 +32,30 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreed) return;
+
+    const nameError = validateDisplayName(form.name);
+    const emailError = validateEmail(form.email);
+    const passwordError = validatePassword(form.password);
+    if (nameError || emailError || passwordError) {
+      setError(nameError ?? emailError ?? passwordError ?? '');
+      return;
+    }
+    if (passwordStrength < 2) {
+      setError('Password is too weak. Add uppercase letters, numbers, or symbols.');
+      return;
+    }
+
     setLoading(true);
     setError('');
-    const { data, error } = await signUp(form.email, form.password, form.name);
+    const { data, error } = await signUp(form.email.trim(), form.password, form.name.trim());
     if (error) {
       setError(error.message);
       setLoading(false);
       return;
     }
     if (data.session) {
-      // Logged in immediately (email confirmation disabled)
       window.location.href = '/onboarding';
     } else {
-      // Email confirmation required
       setError('');
       setLoading(false);
       setConfirmationSent(true);
@@ -137,6 +149,7 @@ export default function SignupPage() {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="NOVA VEGA or Jane Smith"
                 required
+                maxLength={80}
                 className="w-full glass rounded-xl px-4 py-3.5 text-sm text-white placeholder-slate-600 outline-none focus:border-purple-500/60 transition-colors bg-white/[0.03]"
               />
             </div>
@@ -151,6 +164,7 @@ export default function SignupPage() {
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="your@email.com"
                 required
+                maxLength={254}
                 className="w-full glass rounded-xl px-4 py-3.5 text-sm text-white placeholder-slate-600 outline-none focus:border-purple-500/60 transition-colors bg-white/[0.03]"
               />
             </div>
@@ -166,6 +180,7 @@ export default function SignupPage() {
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   placeholder="Choose a strong password"
                   required
+                  maxLength={128}
                   className="w-full glass rounded-xl px-4 py-3.5 pr-12 text-sm text-white placeholder-slate-600 outline-none focus:border-purple-500/60 transition-colors bg-white/[0.03]"
                 />
                 <button
