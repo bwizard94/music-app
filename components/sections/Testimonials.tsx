@@ -90,7 +90,7 @@ export default function Testimonials() {
                 className="text-5xl font-black leading-none mb-4"
                 style={{ color: `${t.color}30` }}
               >
-                "
+                &ldquo;
               </div>
 
               <blockquote className="text-slate-300 text-sm leading-relaxed mb-6">

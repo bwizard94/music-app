@@ -12,25 +12,21 @@ type SectionTab = 'artists' | 'venues';
 
 const SLOT_COUNT: Record<SectionTab, number> = { artists: 3, venues: 2 };
 
+function buildSlots(section: SectionTab): (FeaturedSlot | null)[] {
+  const count = SLOT_COUNT[section];
+  const active = FEATURED_SLOTS.filter((s) => s.section === section && s.active);
+  return Array.from({ length: count }, (_, i) => active[i] ?? null);
+}
+
 export default function FeaturedPage() {
   const { toast } = useToast();
   const [tab, setTab] = useState<SectionTab>('artists');
-  const [slots, setSlots] = useState<(FeaturedSlot | null)[][]>(() => ({
-    artists: buildSlots('artists'),
-    venues: buildSlots('venues'),
-  }) as unknown as (FeaturedSlot | null)[][]);
   const [slotMap, setSlotMap] = useState<Record<SectionTab, (FeaturedSlot | null)[]>>({
     artists: buildSlots('artists'),
     venues: buildSlots('venues'),
   });
   const [searchOpen, setSearchOpen] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-
-  function buildSlots(section: SectionTab): (FeaturedSlot | null)[] {
-    const count = SLOT_COUNT[section];
-    const active = FEATURED_SLOTS.filter((s) => s.section === section && s.active);
-    return Array.from({ length: count }, (_, i) => active[i] ?? null);
-  }
 
   const currentSlots = slotMap[tab];
 
@@ -41,6 +37,7 @@ export default function FeaturedPage() {
 
   const handleSelect = (slotIndex: number, entity: { name: string; image: string; slug: string; type: SectionTab extends 'artists' ? 'artist' : 'venue' }) => {
     const newSlot: FeaturedSlot = {
+      // eslint-disable-next-line react-hooks/purity
       id: `new-${Date.now()}`,
       section: tab,
       entityName: entity.name,

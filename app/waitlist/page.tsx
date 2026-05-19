@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   Zap, ArrowRight, Check, Copy, Share2,
@@ -60,34 +60,30 @@ function ProgressDots({ step }: { step: Step }) {
   );
 }
 
+function getUrlParams() {
+  if (typeof window === 'undefined') return { code: '', email: '' };
+  const params = new URLSearchParams(window.location.search);
+  return {
+    code: (params.get('code') ?? params.get('invite') ?? '').toUpperCase(),
+    email: params.get('email') ?? '',
+  };
+}
+
 export default function WaitlistPage() {
-  const [step, setStep] = useState<Step>('role');
+  const [entry, setEntry] = useState<WaitlistEntry | null>(() =>
+    typeof window === 'undefined' ? null : readWaitlistEntry()
+  );
+  const [step, setStep] = useState<Step>(() =>
+    typeof window === 'undefined' ? 'role' : (readWaitlistEntry() ? 'done' : 'role')
+  );
   const [role, setRole] = useState('');
   const [city, setCity] = useState('');
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [inviteCode, setInviteCode] = useState('');
+  const [email, setEmail] = useState(() => getUrlParams().email);
+  const [inviteCode, setInviteCode] = useState(() => getUrlParams().code);
   const [loading, setLoading] = useState(false);
-  const [entry, setEntry] = useState<WaitlistEntry | null>(null);
   const [inviteCodeError, setInviteCodeError] = useState('');
   const [shareCopied, setShareCopied] = useState(false);
-
-  // Pre-fill invite code from URL query param
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code') ?? params.get('invite') ?? '';
-    if (code) setInviteCode(code.toUpperCase());
-
-    const email = params.get('email') ?? '';
-    if (email) setEmail(email);
-
-    // If already on waitlist, jump to done
-    const existing = readWaitlistEntry();
-    if (existing) {
-      setEntry(existing);
-      setStep('done');
-    }
-  }, []);
 
   const selectedCity = CITY_OPTIONS.find(c => c.id === city);
   const referralUrl = typeof window !== 'undefined'

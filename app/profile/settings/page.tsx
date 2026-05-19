@@ -63,6 +63,7 @@ function useAutosave(onSave?: () => void) {
   const [state, setState] = useState<SaveState>('saved');
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onSaveRef = useRef(onSave);
+  // eslint-disable-next-line react-hooks/refs
   onSaveRef.current = onSave;
 
   const markDirty = useCallback(() => {
@@ -383,8 +384,11 @@ function ProfileInfoTab({
   const nameRef = useRef(name);
   const bioRef = useRef(bio);
   const cityRef = useRef(city);
+  // eslint-disable-next-line react-hooks/refs
   nameRef.current = name;
+  // eslint-disable-next-line react-hooks/refs
   bioRef.current = bio;
+  // eslint-disable-next-line react-hooks/refs
   cityRef.current = city;
 
   const { state, markDirty } = useAutosave(() => {
@@ -393,7 +397,7 @@ function ProfileInfoTab({
         display_name: nameRef.current,
         bio: bioRef.current,
         city: cityRef.current,
-      }).catch(console.error);
+      }).catch(() => {});
     }
   });
 

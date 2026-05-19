@@ -90,7 +90,7 @@ export default function SceneCityPage({ params }: { params: Promise<{ city: stri
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color }}>{scene.country} · Underground Scene</span>
           </div>
           <h1 className="text-white font-black text-4xl sm:text-5xl mb-1">{scene.name}</h1>
-          <p className="text-slate-400 text-sm italic">"{scene.tagline}"</p>
+          <p className="text-slate-400 text-sm italic">&ldquo;{scene.tagline}&rdquo;</p>
         </div>
       </div>
 

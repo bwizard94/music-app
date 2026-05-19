@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   MapPin, Check, Star, Users, CalendarDays, Eye,
   Share2, Bookmark, MessageSquare, Plus, ExternalLink,
@@ -64,12 +65,12 @@ export default function ProfileHero({ artist, isOwner, onTabChange }: Props) {
 
         {/* Owner edit button */}
         {isOwner && (
-          <a
+          <Link
             href="/profile/settings"
             className="absolute top-6 left-6 flex items-center gap-2 glass rounded-xl px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 transition-colors"
           >
             Edit Profile
-          </a>
+          </Link>
         )}
       </div>
 

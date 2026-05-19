@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Zap } from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { ToastProvider } from '@/components/ui/Toast';
@@ -97,12 +97,10 @@ function PinScreen({ onUnlock }: { onUnlock: () => void }) {
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const [unlocked, setUnlocked] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const stored = localStorage.getItem(PIN_KEY);
-    setUnlocked(stored === CORRECT_PIN);
-  }, []);
+  const [unlocked, setUnlocked] = useState<boolean | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem(PIN_KEY) === CORRECT_PIN;
+  });
 
   const handleUnlock = useCallback(() => {
     setUnlocked(true);

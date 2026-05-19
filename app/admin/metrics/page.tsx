@@ -10,6 +10,18 @@ import type { AdminCity } from '@/lib/data/admin';
 
 type SortKey = 'name' | 'artists' | 'events';
 
+function Col({ k, label, sortKey, setSortKey }: { k: SortKey; label: string; sortKey: SortKey; setSortKey: (k: SortKey) => void }) {
+  return (
+    <button
+      onClick={() => setSortKey(k)}
+      className="text-xs font-semibold uppercase tracking-wide transition-colors"
+      style={{ color: sortKey === k ? '#f59e0b' : '#475569' }}
+    >
+      {label}
+    </button>
+  );
+}
+
 const CHART_HEIGHT = 140;
 const maxCount = Math.max(...DAILY_SIGNUPS.map((d) => d.count));
 const periodTotal = DAILY_SIGNUPS.reduce((s, d) => s + d.count, 0);
@@ -78,24 +90,14 @@ function CityTable() {
     return '#475569';
   };
 
-  const Col = ({ k, label }: { k: SortKey; label: string }) => (
-    <button
-      onClick={() => setSortKey(k)}
-      className="text-xs font-semibold uppercase tracking-wide transition-colors"
-      style={{ color: sortKey === k ? '#f59e0b' : '#475569' }}
-    >
-      {label}
-    </button>
-  );
-
   return (
     <div>
       <h3 className="text-white font-semibold text-sm mb-3">City Activity</h3>
       <div className="flex items-center gap-6 mb-2 px-1">
-        <Col k="name" label="City" />
+        <Col k="name" label="City" sortKey={sortKey} setSortKey={setSortKey} />
         <div className="flex-1" />
-        <Col k="artists" label="Artists" />
-        <Col k="events" label="Events" />
+        <Col k="artists" label="Artists" sortKey={sortKey} setSortKey={setSortKey} />
+        <Col k="events" label="Events" sortKey={sortKey} setSortKey={setSortKey} />
         <span className="text-xs text-slate-700 uppercase tracking-wide w-16 text-right">Status</span>
       </div>
       <div className="space-y-1">

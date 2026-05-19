@@ -57,8 +57,9 @@ export default function WaitlistStatusPage() {
   const [activityIndex, setActivityIndex] = useState(0);
 
   useEffect(() => {
-    const e = readWaitlistEntry();
-    setEntry(e);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEntry(readWaitlistEntry());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoaded(true);
   }, []);
 

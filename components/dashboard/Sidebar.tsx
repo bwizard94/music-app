@@ -27,13 +27,12 @@ const QUICK_LINKS = [
   { icon: Sparkles,   label: 'New Proposal',     href: '/proposals/new',    badge: null },
 ];
 
-export default function Sidebar() {
-  const [mobileOpen, setMobileOpen] = useState(false);
+function SidebarContent({ onNavClick }: { onNavClick: () => void }) {
   const pathname = usePathname();
   const { profile, profileSlug } = useAuth();
   const myProfileHref = profileSlug ? `/profile/${profileSlug}` : '/profile/settings';
 
-  const SidebarContent = () => (
+  return (
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5 mb-2">
@@ -75,7 +74,7 @@ export default function Sidebar() {
             <Link
               key={href}
               href={href}
-              onClick={() => setMobileOpen(false)}
+              onClick={() => onNavClick()}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group ${
                 active
                   ? 'bg-purple-500/15 text-purple-400 border border-purple-500/20'
@@ -145,12 +144,17 @@ export default function Sidebar() {
       </div>
     </div>
   );
+}
+
+export default function Sidebar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const closeMobile = () => setMobileOpen(false);
 
   return (
     <>
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-60 flex-shrink-0 bg-[#08080f] border-r border-white/[0.05] h-screen sticky top-0">
-        <SidebarContent />
+        <SidebarContent onNavClick={closeMobile} />
       </aside>
 
       {/* Mobile top bar */}
@@ -182,7 +186,7 @@ export default function Sidebar() {
           className={`absolute inset-0 bg-black/60 transition-opacity duration-300 ${
             mobileOpen ? 'opacity-100' : 'opacity-0'
           }`}
-          onClick={() => setMobileOpen(false)}
+          onClick={closeMobile}
         />
         <aside
           className={`absolute left-0 top-0 bottom-0 w-72 bg-[#08080f] border-r border-white/[0.06] transition-transform duration-300 ${
@@ -190,7 +194,7 @@ export default function Sidebar() {
           }`}
         >
           <div className="pt-16 h-full overflow-y-auto">
-            <SidebarContent />
+            <SidebarContent onNavClick={closeMobile} />
           </div>
         </aside>
       </div>

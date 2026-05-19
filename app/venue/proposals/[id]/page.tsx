@@ -136,7 +136,7 @@ export default function ProposalReviewPage({
     setExpandChanges(false);
     setExpandDecline(false);
     toast({ type: 'success', title: 'Proposal accepted', message: 'The artist has been notified. Build your event workspace.' });
-    updateProposalStatus(id, 'accepted', { venue_response: 'Proposal accepted.' }).catch(console.error);
+    updateProposalStatus(id, 'accepted', { venue_response: 'Proposal accepted.' }).catch(() => {});
   }
 
   function handleSendChanges() {
@@ -146,14 +146,14 @@ export default function ProposalReviewPage({
     toast({ type: 'warning', title: 'Changes requested', message: 'The artist will be notified to revise their proposal.' });
     updateProposalStatus(id, 'changes-requested', {
       change_requests: changeNotes.split('\n').filter(Boolean),
-    }).catch(console.error);
+    }).catch(() => {});
   }
 
   function handleDecline() {
     setVenueAction('rejected');
     setExpandDecline(false);
     toast({ type: 'error', title: 'Proposal declined', message: 'The artist has been notified.' });
-    updateProposalStatus(id, 'rejected', { venue_note: declineReason }).catch(console.error);
+    updateProposalStatus(id, 'rejected', { venue_note: declineReason }).catch(() => {});
   }
 
   return (

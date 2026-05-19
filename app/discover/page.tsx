@@ -803,6 +803,7 @@ function DiscoverPageInner() {
   useEffect(() => {
     const genre = searchParams.get('genre');
     if (genre) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilters(prev => ({ ...prev, genres: [genre] }));
     }
   }, [searchParams]);

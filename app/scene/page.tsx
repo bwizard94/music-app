@@ -44,7 +44,7 @@ export default function SceneIndexPage() {
               Your Scene.<br />Your Sound.
             </h1>
             <p className="text-slate-400 text-lg leading-relaxed max-w-xl mx-auto">
-              Hyper-local hubs for every city's underground. Find your people, discover your city's events, post opportunities, and grow the scene together.
+              Hyper-local hubs for every city&apos;s underground. Find your people, discover your city&apos;s events, post opportunities, and grow the scene together.
             </p>
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function SceneIndexPage() {
                     </div>
                   </div>
                   <div className="p-4">
-                    <p className="text-slate-500 text-xs italic mb-3">"{scene.tagline}"</p>
+                    <p className="text-slate-500 text-xs italic mb-3">&ldquo;{scene.tagline}&rdquo;</p>
                     <div className="flex flex-wrap gap-1 mb-3">
                       {scene.topGenres.slice(0, 3).map((g) => (
                         <span key={g} className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.04] text-slate-500 border border-white/[0.05]">{g}</span>

@@ -30,7 +30,6 @@ export default function VenuePage({ params }: { params: Promise<{ slug: string }
   const { profileSlug } = useAuth();
   const isOwner = profileSlug === slug;
 
-  // TODO: fetch by slug from Supabase
   const venue = THE_BLIND_PIG;
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [bookingOpen, setBookingOpen] = useState(false);
