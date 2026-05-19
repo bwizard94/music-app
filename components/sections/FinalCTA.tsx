@@ -1,15 +1,18 @@
 'use client';
 
-import { ArrowRight, Mail } from 'lucide-react';
 import { useState } from 'react';
+import { ArrowRight, Lock } from 'lucide-react';
+import { CITY_OPTIONS } from '@/lib/data/waitlist';
+import Link from 'next/link';
 
 export default function FinalCTA() {
   const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) setSubmitted(true);
+    if (!email) return;
+    // Pass email into the waitlist flow
+    window.location.href = `/waitlist?email=${encodeURIComponent(email)}`;
   };
 
   return (
@@ -35,9 +38,9 @@ export default function FinalCTA() {
       <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
         {/* Badge */}
         <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-8">
-          <span className="w-2 h-2 rounded-full bg-purple-400 pulse-glow" />
+          <Lock className="w-3 h-3 text-purple-400" />
           <span className="text-xs font-medium text-slate-300 tracking-widest uppercase">
-            Early Access Now Open
+            Invite-Only · Launching by City
           </span>
         </div>
 
@@ -49,61 +52,70 @@ export default function FinalCTA() {
           Are You In?
         </h2>
 
-        <p className="text-slate-400 text-lg max-w-xl mx-auto mb-12 leading-relaxed">
-          Join thousands of artists, venues, and creatives who are already using Stagefront
-          to build their careers and connect with the scenes that matter.
+        <p className="text-slate-400 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
+          Stagefront is opening city by city — invite only. Join the waitlist, get your referral link,
+          and bring your scene with you.
         </p>
 
+        {/* City queue live counts */}
+        <div className="flex items-center justify-center flex-wrap gap-3 mb-10">
+          {CITY_OPTIONS.filter(c => c.active).map(c => (
+            <div
+              key={c.id}
+              className="flex items-center gap-2 glass rounded-full px-3 py-1.5 border border-white/[0.06]"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-slate-300 text-xs font-medium">{c.label}</span>
+              <span className="text-slate-600 text-[10px]">{c.queue.toLocaleString()} waiting</span>
+            </div>
+          ))}
+          <div className="flex items-center gap-2 glass rounded-full px-3 py-1.5 border border-white/[0.06]">
+            <span className="text-slate-600 text-xs">+ 18 more cities</span>
+          </div>
+        </div>
+
         {/* Dual CTA */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-          <a
-            href="/signup"
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
+          <Link
+            href="/waitlist"
             className="group relative flex items-center gap-3 font-bold text-white px-10 py-5 rounded-xl overflow-hidden text-base w-full sm:w-auto justify-center"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-size-200 group-hover:translate-x-full transition-none" />
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600" />
-            <span className="relative">Join as an Artist</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600" />
+            <span className="relative">Join the Waitlist</span>
             <ArrowRight className="relative w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </a>
-          <a
-            href="/signup"
+          </Link>
+          <Link
+            href="/invite/STAGEFRONT"
             className="group relative flex items-center gap-3 font-bold text-white px-10 py-5 rounded-xl overflow-hidden text-base w-full sm:w-auto justify-center"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-rose-600 to-amber-600 group-hover:from-amber-600 group-hover:to-rose-600 transition-all duration-500" />
-            <span className="relative">Join as a Venue</span>
+            <span className="relative">Have an Invite Code?</span>
             <ArrowRight className="relative w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </a>
+          </Link>
         </div>
 
-        {/* Email waitlist */}
+        {/* Email capture → drops into waitlist flow */}
         <div className="max-w-md mx-auto">
-          <p className="text-slate-500 text-sm mb-4">Or get notified when we launch in your city</p>
-          {submitted ? (
-            <div className="glass rounded-xl p-4 text-center">
-              <span className="text-green-400 font-semibold">You&apos;re on the list. We&apos;ll be in touch. 🎵</span>
+          <p className="text-slate-500 text-sm mb-4">Drop your email and we&apos;ll notify you when your city launches</p>
+          <form onSubmit={handleSubmit} className="flex gap-2">
+            <div className="flex-1 relative">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                className="w-full glass rounded-xl py-3.5 px-4 text-sm text-white placeholder-slate-600 outline-none focus:border-purple-500/50 transition-colors"
+                required
+              />
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="flex gap-2">
-              <div className="flex-1 relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  className="w-full glass rounded-xl py-3.5 pl-10 pr-4 text-sm text-white placeholder-slate-600 outline-none focus:border-purple-500/50 transition-colors"
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                className="relative font-semibold text-white px-6 py-3.5 rounded-xl overflow-hidden flex-shrink-0 group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 group-hover:from-pink-600 group-hover:to-purple-600 transition-all duration-500" />
-                <span className="relative text-sm">Notify Me</span>
-              </button>
-            </form>
-          )}
+            <button
+              type="submit"
+              className="relative font-semibold text-white px-6 py-3.5 rounded-xl overflow-hidden flex-shrink-0 group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 group-hover:from-pink-600 group-hover:to-purple-600 transition-all duration-500" />
+              <span className="relative text-sm">Join</span>
+            </button>
+          </form>
         </div>
       </div>
     </section>

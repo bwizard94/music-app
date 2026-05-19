@@ -162,13 +162,13 @@ export default function Hero() {
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
           <a
-            href="/signup"
+            href="/waitlist"
             className="group relative flex items-center gap-3 font-semibold text-white px-8 py-4 rounded-xl overflow-hidden text-base"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 group-hover:from-pink-600 group-hover:to-purple-600 transition-all duration-500" />
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
               style={{ boxShadow: 'inset 0 0 30px rgba(255,255,255,0.1)' }} />
-            <span className="relative">Create Your Profile</span>
+            <span className="relative">Get Early Access</span>
             <ArrowRight className="relative w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </a>
           <a
